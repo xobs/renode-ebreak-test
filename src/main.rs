@@ -26,6 +26,8 @@ unsafe fn add_hook() {}
 #[cfg_attr(target_arch = "riscv32", entry)]
 fn main() -> ! {
     println!("Starting up...");
+
+    #[cfg(target_arch = "riscv32")]
     unsafe { core::arch::asm!("c.ebreak") };
 
     for n in 1..94 {

@@ -1,5 +1,14 @@
 Test ebreak by constantly issuing that command
 
+## Building
+
+Install Rust, then run:
+
+```
+rustup target add riscv32imac-unknown-none-elf
+cargo build --target riscv32imac-unknown-none-elf
+```
+
 ## Testing with tinyemu
 
 To test with Tinyemu, run `tests/my.sh`.
