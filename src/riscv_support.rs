@@ -1,8 +1,12 @@
 pub(crate) struct Serial;
 
-use core::arch::global_asm;
+use core::{arch::global_asm, u8};
 
-const UART_BASE: *mut u32 = 0x4000_8000 as *mut u32;
+extern "C" {
+    static tohost: *mut u32;
+    static fromhost: *mut u32;
+}
+
 // This value needs to be written to UART_BASE+4 in order
 // to print a character.
 const CONSOLE_OUTPUT: u32 = 0x0101_0000;
@@ -10,9 +14,10 @@ const CONSOLE_OUTPUT: u32 = 0x0101_0000;
 impl Serial {
     pub fn putc(&mut self, c: u8) {
         unsafe {
-            UART_BASE.write_volatile(c as u32);
-            UART_BASE.add(1).write_volatile(CONSOLE_OUTPUT);
-            while UART_BASE.read_volatile() != 0 {}
+            let addr = (&tohost as *const _ as usize) as *mut u32;
+            addr.write_volatile(c as u32);
+            addr.add(1).write_volatile(CONSOLE_OUTPUT);
+            while addr.read_volatile() != 0 {}
         }
     }
 }
@@ -55,8 +60,9 @@ impl core::fmt::Write for Serial {
 pub(crate) fn exit(_code: i32) -> ! {
     loop {
         unsafe {
-            UART_BASE.write_volatile(1);
-            UART_BASE.add(1).write_volatile(0);
+            tohost.write_volatile(1);
+            tohost.add(1).write_volatile(0);
+            fromhost.read_volatile();
         }
     }
 }

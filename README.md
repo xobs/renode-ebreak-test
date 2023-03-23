@@ -37,16 +37,6 @@ diff --git a/fesvr/htif.cc b/fesvr/htif.cc
 index 3f93f7b5..563c9594 100644
 --- a/fesvr/htif.cc
 +++ b/fesvr/htif.cc
-@@ -158,7 +158,8 @@ void htif_t::load_program()
-     tohost_addr = symbols["tohost"];
-     fromhost_addr = symbols["fromhost"];
-   } else {
--    fprintf(stderr, "warning: tohost and fromhost symbols not in ELF; can't communicate with target\n");
-+    tohost_addr = 0x40008000;
-+    fromhost_addr = 0x40008000;
-   }
-
-   // detect torture tests so we can print the memory signature at the end
 @@ -262,8 +263,13 @@ int htif_t::run()
      uint64_t tohost;
 
@@ -63,26 +53,13 @@ index 3f93f7b5..563c9594 100644
      } catch (mem_trap_t& t) {
        bad_address("accessing tohost", t.get_tval());
      }
-diff --git a/riscv/platform.h b/riscv/platform.h
-index 2bafa68d..3bc7ff18 100644
---- a/riscv/platform.h
-+++ b/riscv/platform.h
-@@ -2,7 +2,7 @@
- #ifndef _RISCV_PLATFORM_H
- #define _RISCV_PLATFORM_H
-
--#define DEFAULT_RSTVEC     0x00001000
-+#define DEFAULT_RSTVEC     0x80000000
- #define CLINT_BASE         0x02000000
- #define CLINT_SIZE         0x000c0000
- #define PLIC_BASE          0x0c000000
  ```
 
  Then run Spike with:
 
 ```
- spike \
-     -m0x80000000:1048576,0x40008000:4096 \
-     --disable-dtb \
-     --isa=RV32IMAC target/riscv32imac-unknown-none-elf/debug/renode-ebreak-test
+spike \
+    -m0x80000000:1048576,0x40008000:4096 \
+    --isa=RV32IMAC \
+    target/riscv32imac-unknown-none-elf/debug/renode-ebreak-test
 ```
